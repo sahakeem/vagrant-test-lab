@@ -80,7 +80,7 @@ Vagrant.configure(2) do |config|
 #This block allows you to specify the amount of ram, cpu etc to
 # configure your vagrant boxes with
 
-	config.vm.provider "virtualbox" do |vb|
+	config.vm.provider "libvirt" do |vb|
 	    vb.memory = "3070"
 	    vb.cpus = "2"
 	end
