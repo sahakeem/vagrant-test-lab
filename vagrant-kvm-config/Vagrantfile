@@ -1,0 +1,137 @@
+#*- mode: ruby -*-
+# vi: set ft=ruby :
+#ubuntu/zesty64
+
+$script = <<SCRIPT
+echo "Installing epel-release"
+yum -y install epel-release
+
+
+
+
+echo "Updating Yum"
+yum -y update
+
+
+
+
+echo "Installing Base Packages "
+yum -y install iptraf bwm-ng telnet wget mlocate tree lynx bind-utils net-tools vim netstat nmap nmap-ncat bind-utils
+
+
+
+useradd techadmin
+gpasswd -a techadmin wheel
+
+#cat /etc/sudoers | grep %wheel | sed -i s/#// /etc/sudoers
+echo "%wheel ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers
+
+passwd <<EOF
+12345678
+12345678
+EOF
+
+passwd techadmin <<EOF
+12345
+12345
+EOF
+
+mkdir /home/techadmin/.ssh
+
+touch /home/techadmin/.ssh/authorized_keys
+chmod 700 /home/techadmin/.ssh
+chmod 644 /home/techadmin/.ssh/authorized_keys
+chown -R techadmin:techadmin /home/techadmin/.ssh/
+
+#vagrant adds a default user and key but you can add your own with this method
+echo ssh-rsa "add the sshkey of your choice." >> /home/techadmin/.ssh/authorized_keys
+
+
+
+
+echo "192.200.200.20 vagrant-vm1.vm.box
+192.200.200.21  vagrant-vm2.vm.box
+192.200.200.22  vagrant-vm3.vm.box
+192.200.200.5   vag-vmws1.vm.box
+192.200.200.6   vag-vm1.vm.box
+192.200.200.7   vag-vm2.vm.box
+192.200.200.8   vag-vm3.vm.box
+192.200.200.9   vag-vm4.vm.box
+19" >> /etc/hosts
+
+
+#!/bin/bash
+# Find host IP
+echo "Find ip"
+ip=`ip addr | grep inet | grep 192 | awk '{print $2}' | cut -d'/' -f1`
+echo $ip
+# Set ip output to a variable
+echo "Find host name using $ip"
+host=`cat /etc/hosts | grep -w $ip | awk '{print $2}'`
+# Set hostname
+hostnamectl set-hostname $host
+SCRIPT
+
+
+
+
+Vagrant.configure(2) do |config|
+
+#This block allows you to specify the amount of ram, cpu etc to
+# configure your vagrant boxes with
+
+	config.vm.provider "virtualbox" do |vb|
+	    vb.memory = "3070"
+	    vb.cpus = "2"
+	end
+
+config.vm.provision "shell", inline: $script
+
+
+############################### Centos Minimal Boxes ################################
+config.vm.define "vagrant-vm1" do |vagrant-vm1|
+	vagrant-vm1.vm.box = "centos/7"
+config.vm.network "private_network", ip: "192.200.200.20"
+end
+
+
+config.vm.define "vagrant-vm2" do |vagrant-vm2|
+        vagrant-vm2.vm.box = "centos/7"
+config.vm.network "private_network", ip: "192.200.200.21"
+end
+
+config.vm.define "vagrant-vm3" do |vagrant-vm3|
+        vagrant-vm3.vm.box = "centos/7"
+config.vm.network "private_network", ip: "192.200.200.22"
+end
+
+
+config.vm.define "vag-vmws1" do |vag-vmws1|
+	vag-vmws1.vm.box = "centos/7"
+config.vm.network "private_network", ip: "192.200.200.5"
+end
+
+
+config.vm.define "vag-vm1" do |vag-vm1|
+	vag-vm1.vm.box = "centos/7"
+config.vm.network "private_network", ip: "192.200.200.6"
+end
+
+
+config.vm.define "vag-vm2" do |vag-vm2|
+	vag-vm2.vm.box = "centos/7"
+config.vm.network "private_network", ip: "192.200.200.7"
+end
+
+
+config.vm.define "vag-vm3" do |vag-vm3|
+	vag-vm3.vm.box = "centos/7"
+config.vm.network "private_network", ip: "192.200.200.8"
+end
+
+config.vm.define "vag-vm4" do |vag-vm4|
+	vag-vm4.vm.box = "centos/7"
+config.vm.network "private_network", ip: "192.200.200.9"
+end
+
+end
